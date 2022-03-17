@@ -1,0 +1,135 @@
+########################SESSION CREATION####################
+1.Create session in login servlet
+HttpSession session=request.getSession();
+session.setAttribute("uid","request.getParameter("txtuser"));
+
+** creat session in login jsp
+session.getAttribute("key","value");
+
+2.Write Code in all jsp pages after login
+if(session.getAttribute("uid")==null)
+{
+ response.sendRedirect("login.jsp")
+}
+
+**GET sesiion data in servlet
+HttpSession session=request.getSession();
+if(session.getAttribute("uid")==null)
+{
+ response.sendRedirect("login.jsp")
+}
+
+3.logout
+session.removeAttribute("uid")
+session.invalidate();
+response.sendRedirect("login.jsp")
+
+Note:-  By default session time interval is 30 MINUTES we can increase or decrease the session time interval from the application.
+
+using session.setMaxInactiveInterval(600); 
+-------------------------------------------------------------------------------------
+
+#############################Back button Enable######################################
+Write this code in all jsp page
+
+<%
+response.setHeader("Pragma","no-cache");
+response.setHeader("Cache-Control","no-store");
+response.setHeader("Expires","0");
+response.setDateHeader("Expires",-1);
+%>
+
+-------------------------------------------------------------------------------------
+
+############################Cookies Creation#########################################
+1. creat cookie
+try {
+			Datahelper.connection();
+			ResultSet res=Datahelper.dqlOpe("select * from admin where user='"+request.getParameter("txtuser")+"'and password='"+request.getParameter("txtpass")+"'");
+			 if(res.next())
+			 {
+				 HttpSession session = request.getSession() ;
+				 if(request.getParameter("chk")!=null)
+				 { 
+				 Cookie	c1=new Cookie("cd",request.getParameter("txtuser"));
+				 c1.setMaxAge(1000);
+				 response.addCookie(c1);
+				 Cookie c2= new Cookie("pw",request.getParameter("txtpass"));
+				 c2.setMaxAge(1000);
+				 response.addCookie(c2);
+			     }
+				 session.setAttribute("uid",request.getParameter("txtuser"));
+				 response.sendRedirect("databaseui/InsetStunameRno.jsp?");
+			 }
+			 else
+			 {
+				 response.sendRedirect("index1jsp.jsp?q=invalid userid and password");
+			 }
+		} catch (Exception ex) {
+		out.print(ex.getMessage());	
+		}
+
+2.get cookie value in login page enter record in body tag
+<%
+String uname="";
+String upass="";
+if(request.getCookies()!=null)
+{
+Cookie arr[]=request.getCookies();
+for(int i=0;i<arr.length;i++)
+  {
+	 if(arr[i].getName().equals("cd"))
+	 {
+		 uname=arr[i].getValue();
+	 }
+	 if(arr[i].getName().equals("pw"))
+	 {
+		  upass=arr[i].getValue();
+	 }
+  }
+}
+%>
+
+
+3. Removeid and pass after logout in cookie
+
+<%
+Cookie arr[]=request.getCookies();
+for(int i=0;i<arr.length;i++)
+ {
+	if(arr[i].getName().equals("cd"))
+	{
+		Cookie cuid=arr[i];
+		cuid.setPath("/ierp");
+		cuid.setMaxAge(0);
+		cuid.setValue("");
+		
+		response.addCookie(cuid);
+		out.println(arr[i].getName());
+		out.println(arr[i].getValue());
+	}
+		
+	if(arr[i].getName().equals("pw"))
+	{
+		Cookie cpass=arr[i];
+		cpass.setPath("/ierp");
+		cpass.setMaxAge(0);
+		cpass.setValue("");
+		
+		response.addCookie(cpass);
+		out.println(arr[i].getName());
+		out.println(arr[i].getValue());
+	}
+ }
+
+session.removeAttribute("uid");
+session.invalidate();
+response.setHeader("Pragma","no-cache");
+response.setHeader("Cache-Control","no-store");
+response.setHeader("Expires","0");
+response.setDateHeader("Expires",-1);
+response.sendRedirect("../index1jsp.jsp");
+
+
+
+%>
